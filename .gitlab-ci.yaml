@@ -1,0 +1,31 @@
+variables:
+  KUBERNETES_CPU_REQUEST: 0.5
+  KUBERNETES_CPU_LIMIT: 1
+  KUBERNETES_MEMORY_REQUEST: 0.5Gi
+  KUBERNETES_MEMORY_LIMIT: 2Gi
+
+stages:
+  - build
+  - image-build
+
+build:
+
+  image: node:14.19-alpine
+  stage: build
+  script:
+    - npm install -g @angular/cli
+    - npm install
+    - ng build --prod --output-path=${CI_PROJECT_DIR}/build
+  artifacts:
+    paths:
+      - build
+    expire_in: 1 week 
+
+
+image-build:
+  image: gcr.io/kaniko-project/executor:debug
+  stage: image-build
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "$CI_DEPLOY_USER" "$CI_DEPLOY_PASSWORD" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context "${CI_PROJECT_DIR}" --dockerfile "${CI_PROJECT_DIR}/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}"
