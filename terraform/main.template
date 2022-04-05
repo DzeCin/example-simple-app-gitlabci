@@ -1,0 +1,23 @@
+
+terraform {  
+  backend "pg" {}
+  required_providers {
+  
+      kubernetes = {
+          source = "hashicorp/kubernetes"
+          version = "2.9.0"
+        }
+    }
+
+  }
+
+
+provider "kubernetes" {
+}
+
+module deploy {
+  source = "./module"
+  deployName = {{deployName}}
+  namespace = {{deployNamespace}}
+  serviceName = "app"
+  }

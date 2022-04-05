@@ -1,15 +1,10 @@
-variables:
-  KUBERNETES_CPU_REQUEST: 0.5
-  KUBERNETES_CPU_LIMIT: 1
-  KUBERNETES_MEMORY_REQUEST: 0.5Gi
-  KUBERNETES_MEMORY_LIMIT: 2Gi
-
 stages:
   - build
   - image-build
+  - build-terraform
+  - deploy
 
 build:
-
   image: node:14.19-alpine
   stage: build
   script:
@@ -28,4 +23,29 @@ image-build:
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "$CI_DEPLOY_USER" "$CI_DEPLOY_PASSWORD" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context "${CI_PROJECT_DIR}" --dockerfile "${CI_PROJECT_DIR}/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}"
+    - /kaniko/executor --force --context "${CI_PROJECT_DIR}" --dockerfile "${CI_PROJECT_DIR}/Dockerfile" --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}"
+
+build-main.tf:
+  image: python
+  stage: build-terraform
+  script:
+    - cd terraform
+    - python format.py deployName=\"app\" deployNamespace=\"dcindrak\"
+  artifacts:
+    paths:
+      - terraform
+    expire_in: 1 week
+
+deploy:
+  dependencies:
+    - "build-main.tf"
+  variables:
+    KUBERNETES_SERVICE_ACCOUNT_OVERWRITE_ALLOWED: "true"
+    KUBERNETES_SERVICE_ACCOUNT_OVERWRITE: deploy
+  image: hashicorp/terraform:light
+  stage: deploy
+  script:
+    - cd terraform
+    - terraform init -backend-config="conn_str=postgres://dzenan:dzenan@db/terraform_backend?sslmode=disable"
+    - terraform refresh
+    - terraform apply -auto-approve
