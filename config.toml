@@ -1,0 +1,2 @@
+[runners.kubernetes]
+  service_account_overwrite_allowed = true
