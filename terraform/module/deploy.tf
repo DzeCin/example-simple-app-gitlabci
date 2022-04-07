@@ -18,6 +18,7 @@ resource "kubernetes_deployment" "app" {
     }
 
     template {
+
       metadata {
         labels = {
           tier = "frontend"
@@ -25,7 +26,7 @@ resource "kubernetes_deployment" "app" {
       }
 
       spec {
-        image_pull_secret = "gitlab-cr"
+        image_pull_secrets {name  = "gitlab-cr"}
         container {
           image = "gitlab.cns-com.com:5678/dcindrak/example-simple-app"
           name  = var.deployName
