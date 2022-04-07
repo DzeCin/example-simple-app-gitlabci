@@ -25,9 +25,9 @@ resource "kubernetes_deployment" "app" {
       }
 
       spec {
-
+        image_pull_secret = "gitlab-cr"
         container {
-          image = "nginx"
+          image = "gitlab.cns-com.com:5678/dcindrak/example-simple-app"
           name  = var.deployName
           resources {
             limits = {
