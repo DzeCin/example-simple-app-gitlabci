@@ -30,7 +30,7 @@ build-main.tf:
   stage: build-terraform
   script:
     - cd terraform
-    - python format.py deployName=\"app\" deployNamespace=\"dcindrak\"
+    - python format.py deployName=\"app2\" deployNamespace=\"dcindrak\"
   artifacts:
     paths:
       - terraform
@@ -46,6 +46,6 @@ deploy:
   stage: deploy
   script:
     - cd terraform
-    - terraform init -backend-config="conn_str=postgres://dzenan:dzenan@db/terraform_backend?sslmode=disable"
+    - terraform init -backend-config="conn_str=postgres://$DB_USER:$DB_PSWD@db/terraform_backend?sslmode=disable"
     - terraform refresh
     - terraform apply -auto-approve

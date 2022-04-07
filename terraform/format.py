@@ -7,9 +7,9 @@ deployName = ""
 deployNamespace = ""
 
 for i in sys.argv:
-    if "deployName" in i:
+    if "deployName=" in i:
         deployName = i.split("=")[1]
-    if "deployNamespace" in i:
+    if "deployNamespace=" in i:
         deployNamespace = i.split("=")[1]
 
 assert deployNamespace != ""
