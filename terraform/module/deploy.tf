@@ -29,6 +29,7 @@ resource "kubernetes_deployment" "app" {
         image_pull_secrets {name  = "gitlab-cr"}
         container {
           image = "gitlab.cns-com.com:5678/dcindrak/example-simple-app"
+          image_pull_policy = "Always"
           name  = var.deployName
           resources {
             limits = {
