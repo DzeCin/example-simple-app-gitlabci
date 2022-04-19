@@ -30,7 +30,7 @@ build-main.tf:
   stage: build-terraform
   script:
     - cd terraform
-    - python format.py deployName=\"app2\" deployNamespace=\"dcindrak\"
+    - python format.py deployName=\"$APP_NAME\" deployNamespace=\"$NAMESPACE\"
   artifacts:
     paths:
       - terraform
